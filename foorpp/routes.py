@@ -1,7 +1,15 @@
-from flask import flash, get_flashed_messages, redirect, render_template, request, url_for
+from flask import (
+    abort,
+    flash,
+    get_flashed_messages,
+    redirect,
+    render_template,
+    request,
+    url_for
+)
 from foorpp import app
 from foorpp.forms import SearchForm
-from foorpp.filters import filtered_items
+from foorpp.filters import filter_by_keyword
 from foorpp.models import Category, MenuItem
 
 
@@ -49,16 +57,23 @@ def menu():
         filter_arg = data[0]["filter_arg"]
 
     search = SearchForm()
-    menu_items = filtered_items(filter_arg.strip().lower())
+    menu_items = filter_by_keyword(filter_arg.strip().lower())
 
     return render_template("menu.html", search = search, filter_arg = filter_arg,
                            items = menu_items)
 
 
-# @app.before_first_request
-# def create_tables():
-#     db.create_all()
-#     # db.session.add(Category(name="pizza", value="Pizza"))
-#     # db.session.add(Category(name="burger", value="Burger"))
-#     # db.session.add(Category(name="sushi", value="Sushi"))
-#     # db.session.commit()
+@app.route("/item/<item_id>")
+def item(item_id):
+    search = SearchForm()
+    menu_item = MenuItem.query.filter(MenuItem.id == item_id).first()
+    if menu_item is None:
+        abort(404)
+
+    return render_template("item.html", search = search, item = menu_item)
+
+
+@app.errorhandler(404)
+def page_not_found(e):
+    search = SearchForm()
+    return render_template("404.html", search = search)

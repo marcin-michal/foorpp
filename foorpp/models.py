@@ -1,4 +1,5 @@
 from foorpp import db
+from functools import total_ordering
 
 
 menu_item_tags = db.Table("menu_item_tags",
@@ -23,11 +24,13 @@ class Category(db.Model):
         return f"Category('{self.category_name}', '{self.category_value}')"
 
 
+@total_ordering
 class MenuItem(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     name = db.Column(db.String(30), nullable = False)
     price = db.Column(db.Double, nullable = False)
     description = db.Column(db.String(1000))
+    image = db.Column(db.String(50), nullable = False, default = "static/images/default.jpg")
     tags = db.relationship("ItemTag", secondary = menu_item_tags,
                            backref = "menu_items")
     allergens = db.relationship("Allergen", secondary = menu_item_allergens,
@@ -35,6 +38,12 @@ class MenuItem(db.Model):
 
     def __repr__(self):
         return f"MenuItem('{self.id}', '{self.name}', '{self.price}')"
+
+    def __eq__(self, other):
+        return self.id == other.id
+
+    def __lt__(self, other):
+        return self.id < other.id
 
 
 class ItemTag(db.Model):

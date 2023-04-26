@@ -1,0 +1,38 @@
+{% extends "base_w_header.html" %}
+{% block content %}
+    <img src="{{ url_for('static', filename='images/default.jpg') }}">
+    <h1>{{ item.name }}</h1>
+    <ul>
+        <li>
+            {{ item.price }} €
+        </li>
+        {% if item.description is not none %}
+        <li>
+                {{ item.description }}
+        </li>
+        {% endif %}
+        {% if item.tags|length > 0 %}
+        <li>
+            <ul>
+                {% for tag in item.tags %}
+                    <li>
+                        {{ tag.tag }}
+                    </li>
+                {% endfor %}
+            </ul>
+        </li>
+        {% endif %}
+        {% if item.allergens|length > 0 %}
+        <li>
+            <ul>
+                {% for allergen in item.allergens %}
+                    <li>
+                        {{ allergen.allergen }}
+                    </li>
+                {% endfor %}
+            </ul>
+        </li>
+        {% endif %}
+    </ul>
+    <a href="">Add to cart</a>
+{% endblock content %}

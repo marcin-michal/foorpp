@@ -1,24 +1,26 @@
 {% extends "base_w_header.html" %}
 {% block content %}
-    <h1>{{ filter_arg }}</h1>
+    <h1>Our finest selection</h1>
     <ul>
         {% for item in items %}
             <li>
                 <ul>
                     <li>
-                        {{ item.name }}
+                        <img src="{{ url_for('static', filename='images/default.jpg') }}">
                     </li>
                     <li>
-                        {{ item.price }}
+                        <h1><a href="{{ url_for('item', item_id=item.id) }}">{{ item.name }}</a></h1>
                     </li>
+                    <li>
+                        {{ item.price }} €
+                    </li>
+                    {% if item.description is not none %}
                     <li>
                         {{ item.description }}
                     </li>
+                    {% endif %}
                     <li>
-                        {{ item.tags }}
-                    </li>
-                    <li>
-                        {{ item.allergens }}
+                        <a href="">Add to cart</a>
                     </li>
                 </ul>
             </li>
