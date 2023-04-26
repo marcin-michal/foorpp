@@ -3,16 +3,16 @@ from foorpp import db
 
 menu_item_tags = db.Table("menu_item_tags",
                           db.Column("menu_item_id", db.Integer,
-                                    db.ForeignKey("menu_item_id")),
+                                    db.ForeignKey("menu_item.id")),
                           db.Column("item_tag_id", db.Integer,
-                                    db.ForeignKey("item_tag_id")))
+                                    db.ForeignKey("item_tag.id")))
 
 
 menu_item_allergens = db.Table("menu_item_allergens",
                                db.Column("menu_item_id", db.Integer,
-                                         db.ForeignKey("menu_item_id")),
+                                         db.ForeignKey("menu_item.id")),
                                db.Column("allergen_id", db.Integer,
-                                         db.ForeignKey("allergen_id")))
+                                         db.ForeignKey("allergen.id")))
 
 
 class Category(db.Model):
@@ -33,12 +33,21 @@ class MenuItem(db.Model):
     allergens = db.relationship("Allergen", secondary = menu_item_allergens,
                                 backref = "menu_items")
 
+    def __repr__(self):
+        return f"MenuItem('{self.id}', '{self.name}', '{self.price}')"
+
 
 class ItemTag(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     tag = db.Column(db.String(50))
 
+    def __repr__(self):
+        return f"ItemTag('{self.tag}')"
+
 
 class Allergen(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     allergen = db.Column(db.String(30), nullable = False)
+
+    def __repr__(self):
+        return f"ItemTag('{self.allergen}')"

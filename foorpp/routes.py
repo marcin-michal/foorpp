@@ -1,7 +1,8 @@
 from flask import flash, get_flashed_messages, redirect, render_template, request, url_for
-from foorpp import app, db
+from foorpp import app
 from foorpp.forms import SearchForm
-from foorpp.models import Category
+from foorpp.filters import filtered_items
+from foorpp.models import Category, MenuItem
 
 
 @app.route("/", methods = ["GET", "POST"])
@@ -42,15 +43,22 @@ def admin_login():
 
 @app.route("/menu/", methods = ["GET", "POST"])
 def menu():
+    filter_arg = ""
     data = get_flashed_messages()
+    if data:
+        filter_arg = data[0]["filter_arg"]
+
     search = SearchForm()
-    return render_template("menu.html", search = search, filter_arg = data[0]["filter_arg"])
+    menu_items = filtered_items(filter_arg.strip().lower())
+
+    return render_template("menu.html", search = search, filter_arg = filter_arg,
+                           items = menu_items)
 
 
-@app.before_first_request
-def create_tables():
-    db.create_all()
-    # db.session.add(Category(name="pizza", value="Pizza"))
-    # db.session.add(Category(name="burger", value="Burger"))
-    # db.session.add(Category(name="sushi", value="Sushi"))
-    # db.session.commit()
+# @app.before_first_request
+# def create_tables():
+#     db.create_all()
+#     # db.session.add(Category(name="pizza", value="Pizza"))
+#     # db.session.add(Category(name="burger", value="Burger"))
+#     # db.session.add(Category(name="sushi", value="Sushi"))
+#     # db.session.commit()

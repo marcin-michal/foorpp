@@ -1,4 +1,27 @@
 {% extends "base_w_header.html" %}
 {% block content %}
     <h1>{{ filter_arg }}</h1>
+    <ul>
+        {% for item in items %}
+            <li>
+                <ul>
+                    <li>
+                        {{ item.name }}
+                    </li>
+                    <li>
+                        {{ item.price }}
+                    </li>
+                    <li>
+                        {{ item.description }}
+                    </li>
+                    <li>
+                        {{ item.tags }}
+                    </li>
+                    <li>
+                        {{ item.allergens }}
+                    </li>
+                </ul>
+            </li>
+        {% endfor %}
+    </ul>
 {% endblock content %}
