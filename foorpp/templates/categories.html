@@ -1,0 +1,21 @@
+{% extends "base_w_header.html" %}
+
+{% block content %}
+    <h1>Categories</h1>
+    <div class="category-list">
+        <ul>
+            {% for category in categories %}
+                <li>
+                    <form method="POST" action="">
+                        <input type="submit" name="category_button" value="{{ category.value}} ">
+                    </form>
+                </li>
+            {% endfor %}
+            <li>
+                <form method="POST" action="">
+                    <input type="submit" name="_" value="Show me everything!">
+                </form>
+            </li>
+        </ul>
+    </div>
+{% endblock content %}

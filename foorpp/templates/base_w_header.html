@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block page %}
+    <div class="header">
+        <div class="search-bar">
+            <form method="POST" action="">
+                {{ search.hidden_tag() }}
+                {{ search.search() }}
+                {{ search.submit() }}
+            </form>
+        </div>
+    </div>
+
+    {% block content %} {% endblock content %}
+{% endblock page %}
