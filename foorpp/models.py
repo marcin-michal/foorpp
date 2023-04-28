@@ -1,5 +1,6 @@
 from foorpp import db
 from functools import total_ordering
+from sqlalchemy import func
 
 
 menu_item_tags = db.Table("menu_item_tags",
@@ -37,7 +38,7 @@ class MenuItem(db.Model):
                                 backref = "menu_items")
 
     def __repr__(self):
-        return f"MenuItem('{self.id}', '{self.name}', '{self.price}')"
+        return f"MenuItem({self.id}, '{self.name}', '{self.price}')"
 
     def __eq__(self, other):
         return self.id == other.id
@@ -60,3 +61,12 @@ class Allergen(db.Model):
 
     def __repr__(self):
         return f"ItemTag('{self.allergen}')"
+
+
+class CustomerSession(db.Model):
+    id = db.Column(db.Integer, primary_key = True)
+    start = db.Column(db.DateTime, nullable = False, default = func.now())
+    end = db.Column(db.DateTime)
+
+    def __repr__(self):
+        return f"CustomerSession({self.id}, '{self.start}', '{self.end}')"
