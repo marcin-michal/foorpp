@@ -42,29 +42,25 @@ def categories():
     if "id" not in session:
         return redirect(url_for("index"))
 
-    search = SearchForm()
-
     if request.method == "POST":
-        if search.validate_on_submit():
-            filter_arg = search.data["search"]
-        elif "category_button" in request.form:
-            filter_arg = request.form["category_button"]
+        if "searched" in request.form:
+            filter_arg = request.form["searched"]
         else:
             filter_arg = ""
 
-        flash({"filter_arg": filter_arg})
+        flash(filter_arg)
         return redirect(url_for("menu"))
 
-    return render_template("categories.html", search = search,
+    return render_template("categories.html",
                            categories = Category.query.all())
 
 
 @app.route("/admin_login")
 def admin_login():
-    return render_template("admin_login.html", )
+    return render_template("admin_login.html")
 
 
-@app.route("/menu/", methods = ["GET", "POST"])
+@app.route("/menu", methods = ["GET", "POST"])
 def menu():
     if "id" not in session:
         return redirect(url_for("index"))
@@ -72,13 +68,18 @@ def menu():
     filter_arg = ""
     data = get_flashed_messages()
     if data:
-        filter_arg = data[0]["filter_arg"]
+        filter_arg = data[0]
 
     search = SearchForm()
     menu_items = filter_by_keyword(filter_arg.strip().lower())
 
-    return render_template("menu.html", search = search, filter_arg = filter_arg,
-                           items = menu_items)
+    return render_template("menu.html", items = menu_items)
+
+
+@app.route("/search", methods = ["POST"])
+def search():
+    flash(request.form["searched"])
+    return redirect("menu")
 
 
 @app.route("/item/<item_id>")
@@ -86,15 +87,21 @@ def item(item_id):
     if "id" not in session:
         return redirect(url_for("index"))
 
-    search = SearchForm()
     menu_item = MenuItem.query.filter(MenuItem.id == item_id).first()
     if menu_item is None:
         abort(404)
 
-    return render_template("item.html", search = search, item = menu_item)
+    return render_template("item.html", item = menu_item)
+
+
+@app.route("/cart")
+def cart():
+    if "id" not in session:
+        return redirect(url_for("index"))
+
+    return render_template("cart.html")
 
 
 @app.errorhandler(404)
 def page_not_found(_):
-    search = SearchForm()
-    return render_template("404.html", search = search)
+    return render_template("404.html")
