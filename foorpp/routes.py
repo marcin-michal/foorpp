@@ -9,17 +9,18 @@ from flask import (
     url_for
 )
 from foorpp import app, db
-from foorpp.forms import SearchForm
 from foorpp.filters import filter_by_keyword
-from foorpp.models import Category, MenuItem, CustomerSession
+from foorpp.models import Category, CustomerSession, MenuItem, Order
 from sqlalchemy import func
 
 
 @app.route("/", methods = ["GET", "POST"])
 def index():
+    session.clear()
     if "id" in session:
-        CustomerSession.query.filter(CustomerSession.id == session["id"]).first().end = func.now()
-        session.pop("id", None)
+        if session["id"] is not None:
+            CustomerSession.query.get(session["id"]).end = func.now()
+        session.clear()
 
     if request.method == "POST":
         if request.form.get("admin_login_btn"):
@@ -39,7 +40,7 @@ def index():
 
 @app.route("/categories", methods = ["GET", "POST"])
 def categories():
-    if "id" not in session:
+    if session.get("id") is None:
         return redirect(url_for("index"))
 
     if request.method == "POST":
@@ -62,7 +63,7 @@ def admin_login():
 
 @app.route("/menu", methods = ["GET", "POST"])
 def menu():
-    if "id" not in session:
+    if session.get("id") is None:
         return redirect(url_for("index"))
 
     filter_arg = ""
@@ -70,13 +71,12 @@ def menu():
     if data:
         filter_arg = data[0]
 
-    search = SearchForm()
     menu_items = filter_by_keyword(filter_arg.strip().lower())
 
     return render_template("menu.html", items = menu_items)
 
 
-@app.route("/search", methods = ["POST"])
+@app.post("/search")
 def search():
     flash(request.form["searched"])
     return redirect("menu")
@@ -84,22 +84,42 @@ def search():
 
 @app.route("/item/<item_id>")
 def item(item_id):
-    if "id" not in session:
+    if session.get("id") is None:
         return redirect(url_for("index"))
 
-    menu_item = MenuItem.query.filter(MenuItem.id == item_id).first()
+    menu_item = MenuItem.query.get(item_id)
     if menu_item is None:
         abort(404)
 
     return render_template("item.html", item = menu_item)
 
 
-@app.route("/cart")
+@app.route("/cart", methods = ["GET", "POST"])
 def cart():
-    if "id" not in session:
+    if session.get("id") is None:
         return redirect(url_for("index"))
 
-    return render_template("cart.html")
+    order = Order.get_current_order()
+
+    return render_template("cart.html", order=order)
+
+
+@app.post("/add_to_cart/<origin>/<item_id>")
+def add_to_cart(origin, item_id):
+    order = Order.get_current_order()
+    order.add_item(MenuItem.query.get(item_id))
+    db.session.commit()
+
+    if (origin == "item"):
+        return redirect(url_for("item", item_id = item_id))
+
+    return redirect(url_for("menu"))
+
+
+@app.post("/empty_cart")
+def empty_cart():
+    Order.query.get(session["order_id"]).empty_cart()
+    return redirect(url_for("cart"))
 
 
 @app.errorhandler(404)

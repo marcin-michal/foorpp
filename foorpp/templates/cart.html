@@ -1,4 +1,21 @@
 {% extends "base_w_header.html" %}
 
 {% block content %}
+    <h1>Your cart</h1>
+    {% if order is defined and order.item_count > 0 %}
+        <h2>{{ order.item_count }} {% if order.item_count > 0 %}items{% else %}item{% endif %}</h2>
+        <ul>
+            {% for item in order.items %}
+                <li>
+                    {{ item.name }}
+                </li>
+            {% endfor %}
+        </ul>
+        <form method="POST" action="{{ url_for('empty_cart') }}">
+            <button type="submit">Empty cart</button>
+        </form>
+    {% else %}
+        <h2>...is empty :&#40;</h2>
+        <a href="{{ url_for('menu') }}">get something nice</a>
+    {% endif %}
 {% endblock content %}
