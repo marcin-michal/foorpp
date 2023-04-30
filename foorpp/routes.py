@@ -1,7 +1,5 @@
 from flask import (
     abort,
-    flash,
-    get_flashed_messages,
     redirect,
     render_template,
     request,
@@ -44,12 +42,7 @@ def categories():
         return redirect(url_for("index"))
 
     if request.method == "POST":
-        if "searched" in request.form:
-            filter_arg = request.form["searched"]
-        else:
-            filter_arg = ""
-
-        flash(filter_arg)
+        session["keyword"] = request.form.get("searched")
         return redirect(url_for("menu"))
 
     return render_template("categories.html",
@@ -66,19 +59,16 @@ def menu():
     if session.get("id") is None:
         return redirect(url_for("index"))
 
-    filter_arg = ""
-    data = get_flashed_messages()
-    if data:
-        filter_arg = data[0]
-
-    menu_items = filter_by_keyword(filter_arg.strip().lower())
+    keyword = session.get("keyword")
+    menu_items = filter_by_keyword(keyword if keyword is None
+                                   else keyword.strip().lower())
 
     return render_template("menu.html", items = menu_items)
 
 
 @app.post("/search")
 def search():
-    flash(request.form["searched"])
+    session["keyword"] = request.form["searched"]
     return redirect("menu")
 
 
