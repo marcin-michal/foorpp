@@ -9,6 +9,7 @@ from flask import (
 from foorpp import app, db
 from foorpp.filters import filter_by_keyword
 from foorpp.models import Category, CustomerSession, MenuItem, Order
+from foorpp.utils import add_to_cart
 from sqlalchemy import func
 
 
@@ -64,9 +65,7 @@ def menu():
                                    else keyword.strip().lower())
 
     if request.method == "POST":
-        Order.get_current_order() \
-            .add_item(MenuItem.query.get(request.form["item_id"]))
-        db.session.commit()
+        add_to_cart(request.form["item_id"])
 
     return render_template("menu.html", items = menu_items)
 
@@ -87,8 +86,7 @@ def item(item_id):
         abort(404)
 
     if request.method == "POST":
-        Order.get_current_order().add_item(MenuItem.query.get(item_id))
-        db.session.commit()
+        add_to_cart(item_id)
 
     return render_template("item.html", item = menu_item)
 
