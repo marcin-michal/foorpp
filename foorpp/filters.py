@@ -5,7 +5,7 @@ from sqlalchemy import or_
 
 
 def filter_by_keyword(keyword):
-    if not keyword:
+    if keyword is None:
         return MenuItem.query.all()
 
     found_substring =  MenuItem.query.filter(

@@ -34,7 +34,7 @@
         </li>
         {% endif %}
     </ul>
-    <form method="POST" action="{{ url_for('add_to_cart', origin='item', item_id=item.id) }}">
+    <form method="POST">
         <button type="Submit">Add to cart</a>
     </form>
 {% endblock content %}

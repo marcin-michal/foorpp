@@ -15,7 +15,8 @@
             <button type="submit">Empty cart</button>
         </form>
     {% else %}
-        <h2>...is empty :&#40;</h2>
+        <img src="{{ url_for('static', filename='images/empty-cart.gif') }}">
+        <h2>Nothing to see here :&#40;</h2>
         <a href="{{ url_for('menu') }}">get something nice</a>
     {% endif %}
 {% endblock content %}

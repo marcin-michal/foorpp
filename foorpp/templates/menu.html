@@ -1,6 +1,7 @@
 {% extends "base_w_header.html" %}
 {% block content %}
     <h1>Our finest selection</h1>
+    <iframe name="hidden_iframe" style="display:none;"></iframe>
     <ul>
         {% for item in items %}
             <li>
@@ -20,8 +21,8 @@
                     </li>
                     {% endif %}
                     <li>
-                        <form method="POST" action="{{ url_for('add_to_cart', origin='menu', item_id=item.id) }}">
-                            <button type="Submit">Add to cart</a>
+                        <form method="POST" target="hidden_iframe">
+                            <button type="Submit" name="item_id" value="{{ item.id }}">Add to cart</a>
                         </form>
                     </li>
                 </ul>

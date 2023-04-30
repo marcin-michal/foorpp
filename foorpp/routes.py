@@ -63,6 +63,11 @@ def menu():
     menu_items = filter_by_keyword(keyword if keyword is None
                                    else keyword.strip().lower())
 
+    if request.method == "POST":
+        Order.get_current_order() \
+            .add_item(MenuItem.query.get(request.form["item_id"]))
+        db.session.commit()
+
     return render_template("menu.html", items = menu_items)
 
 
@@ -72,7 +77,7 @@ def search():
     return redirect("menu")
 
 
-@app.route("/item/<item_id>")
+@app.route("/item/<item_id>", methods=["GET", "POST"])
 def item(item_id):
     if session.get("id") is None:
         return redirect(url_for("index"))
@@ -80,6 +85,10 @@ def item(item_id):
     menu_item = MenuItem.query.get(item_id)
     if menu_item is None:
         abort(404)
+
+    if request.method == "POST":
+        Order.get_current_order().add_item(MenuItem.query.get(item_id))
+        db.session.commit()
 
     return render_template("item.html", item = menu_item)
 
@@ -92,18 +101,6 @@ def cart():
     order = Order.get_current_order()
 
     return render_template("cart.html", order=order)
-
-
-@app.post("/add_to_cart/<origin>/<item_id>")
-def add_to_cart(origin, item_id):
-    order = Order.get_current_order()
-    order.add_item(MenuItem.query.get(item_id))
-    db.session.commit()
-
-    if (origin == "item"):
-        return redirect(url_for("item", item_id = item_id))
-
-    return redirect(url_for("menu"))
 
 
 @app.post("/empty_cart")
