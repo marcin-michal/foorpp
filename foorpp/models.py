@@ -124,3 +124,7 @@ class Order(db.Model):
         self.item_count = 0
         self.items.clear()
         db.session.commit()
+
+
+class AdminAccount(db.Model):
+    password = db.Column(db.String(50), primary_key = True)

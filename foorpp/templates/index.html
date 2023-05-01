@@ -7,14 +7,14 @@
     </div>
 
     <div class="get_started_btn">
-        <form method="POST" action="">
-            <input type="submit" value="GET STARTED" name="get_started_btn">
+        <form method="POST">
+            <button type="submit">GET STARTED</button>
         </form>
     </div>
 
     <div class="admin_login_btn">
-        <form method="POST" action="">
-            <input type="submit" value="Admin login" name="admin_login_btn">
+        <form method="POST" action="{{ url_for('admin_login') }}">
+            <button type="submit">Admin Login</button>
         </form>
     </div>
 {% endblock body %}

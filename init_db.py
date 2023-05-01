@@ -1,5 +1,5 @@
-from foorpp import db
-from foorpp.models import Allergen, Category, ItemTag, MenuItem
+from foorpp import bcrypt, db
+from foorpp.models import AdminAccount, Allergen, Category, ItemTag, MenuItem
 
 db.drop_all()
 db.create_all()
@@ -30,7 +30,8 @@ tag1 = ItemTag(tag = "pizza")
 tag2 = ItemTag(tag = "yummy")
 tag3 = ItemTag(tag = "vegetarian")
 
-it1 = MenuItem(name = "Pizza", price = 6.99, description = "Very pizza yummy yum yum yum")
+it1 = MenuItem(name = "Pizza", price = 6.99,
+               description = "Very pizza yummy yum yum yum")
 it1.allergens.append(al03)
 it1.allergens.append(al07)
 it1.tags.append(tag1)
@@ -46,6 +47,13 @@ it3 = MenuItem(name = "Mystery", price = 2.58, description = "!!!sushiii")
 it4 = MenuItem(name = "myster2", price = 54546543.32)
 it4.tags.append(tag1)
 
+db.session.add_all([al01, al02, al03, al04, al05, al06, al07, al08, al09, al10,
+                    al11, al12, al13,  al14])
+db.session.add_all([tag1, tag2, tag3])
 db.session.add_all([it1, it2, it3, it4])
+db.session.add(
+    AdminAccount(password = bcrypt.generate_password_hash(password = "admin")
+                 .decode("utf-8"))
+)
 
 db.session.commit()

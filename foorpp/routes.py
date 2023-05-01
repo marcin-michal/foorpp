@@ -1,14 +1,22 @@
 from flask import (
     abort,
+    flash,
     redirect,
     render_template,
     request,
     session,
     url_for
 )
-from foorpp import app, db
+from foorpp import app, bcrypt, db
 from foorpp.filters import filter_by_keyword
-from foorpp.models import Category, CustomerSession, MenuItem, Order
+from foorpp.forms import AdminLoginForm
+from foorpp.models import (
+    AdminAccount,
+    Category,
+    CustomerSession,
+    MenuItem,
+    Order
+)
 from foorpp.utils import add_to_cart
 from sqlalchemy import func
 
@@ -18,9 +26,6 @@ def index():
     session.clear()
 
     if request.method == "POST":
-        if request.form.get("admin_login_btn"):
-            return redirect(url_for("admin_login"))
-
         new_session = CustomerSession()
         db.session.add(new_session)
         db.session.commit()
@@ -43,11 +48,6 @@ def categories():
 
     return render_template("categories.html",
                            categories = Category.query.all())
-
-
-@app.route("/admin_login")
-def admin_login():
-    return render_template("admin_login.html")
 
 
 @app.route("/menu", methods = ["GET", "POST"])
@@ -111,7 +111,41 @@ def finalized_order(order_id):
         CustomerSession.query.get(session["id"]).end = func.now()
         return redirect(url_for("index"))
 
-    return render_template("finalized_order.html", order_num = int(order_id) % 100)
+    return render_template("finalized_order.html",
+                           order_num = int(order_id) % 100)
+
+
+@app.route("/admin_login", methods = ["GET", "POST"])
+def admin_login():
+    form = AdminLoginForm()
+
+    if form.validate_on_submit():
+        admin_account = AdminAccount.query.first()
+
+        if admin_login and bcrypt.check_password_hash(admin_account.password,
+                                                      form.password.data):
+            session["id"] = "admin"
+            return redirect(url_for("admin"))
+
+        flash("Incorrect admin password!")
+
+    return render_template("admin_login.html", form = form, )
+
+
+@app.get("/admin")
+def admin():
+    if session.get("id") != "admin":
+        return redirect(url_for("index"))
+
+    return render_template("admin.html")
+
+
+@app.route("/orders")
+def orders():
+    if session.get("id") != "admin":
+        return redirect(url_for("index"))
+
+    return "hahahaha"
 
 
 @app.errorhandler(404)

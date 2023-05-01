@@ -1,5 +1,16 @@
 {% extends "base.html" %}
 
-{% block page %}
+{% block body %}
+    {% with message = get_flashed_messages() %}
+        {% if message %}
+            {{ message[0] }}
+        {% endif %}
+    {% endwith %}
+
     <h1>Admin login</h1>
-{% endblock page %}
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        {{ form.password }}
+        {{ form.submit }}
+    </form>
+{% endblock body %}
