@@ -1,18 +1,45 @@
 {% extends "base_w_header.html" %}
 
 {% block content %}
+    <iframe name="hidden_iframe" style="display:none;"></iframe>
     <h1>Your cart</h1>
+
     {% if order is defined and order.item_count > 0 %}
         <h2>{{ order.item_count }} {% if order.item_count > 0 %}items{% else %}item{% endif %}</h2>
-        <ul>
-            {% for item in order.items %}
+
+        {% for item in order.items %}
+            <ul>
+                <li>
+                    <form method="POST" target="hidden_iframe">
+                        <button type="submit" name="increase_item" value="{{ item.id }}">+</button>
+                    </form>
+                </li>
+                <li>
+                    {{ item.count }}x
+                </li>
+                <li>
+                    <form method="POST" target="hidden_iframe">
+                        <button type="submit" name="decrease_item" value="{{ item.id }}">-</button>
+                    </form>
+                </li>
                 <li>
                     {{ item.name }}
                 </li>
-            {% endfor %}
-        </ul>
+                <li>
+                    <form method="POST" target="hidden_iframe">
+                        <button type="submit" name="remove_item" value="{{ item.id }}">🗑</button>
+                    </form>
+                </li>
+            </ul>
+        {% endfor %}
+
+        <h2>Total: {{order.total_price}} €</h2>
+
         <form method="POST" action="{{ url_for('empty_cart') }}">
             <button type="submit">Empty cart</button>
+        </form>
+        <form method="POST" action="{{ url_for('finalized_order', order_id = order.id) }}">
+            <button type="submit">Order</button>
         </form>
     {% else %}
         <img src="{{ url_for('static', filename='images/empty-cart.gif') }}">

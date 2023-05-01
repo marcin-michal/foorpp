@@ -16,23 +16,18 @@ from sqlalchemy import func
 @app.route("/", methods = ["GET", "POST"])
 def index():
     session.clear()
-    if "id" in session:
-        if session["id"] is not None:
-            CustomerSession.query.get(session["id"]).end = func.now()
-        session.clear()
 
     if request.method == "POST":
         if request.form.get("admin_login_btn"):
             return redirect(url_for("admin_login"))
 
-        if request.form.get("get_started_btn"):
-            new_session = CustomerSession()
-            db.session.add(new_session)
-            db.session.commit()
+        new_session = CustomerSession()
+        db.session.add(new_session)
+        db.session.commit()
 
-            session["id"] = new_session.id
+        session["id"] = new_session.id
 
-            return redirect(url_for("categories"))
+        return redirect(url_for("categories"))
 
     return render_template("index.html")
 
@@ -105,6 +100,18 @@ def cart():
 def empty_cart():
     Order.query.get(session["order_id"]).empty_cart()
     return redirect(url_for("cart"))
+
+
+@app.route("/order/<order_id>", methods = ["GET", "POST"])
+def finalized_order(order_id):
+    Order.query.get(order_id).status = "submitted"
+    db.session.commit()
+
+    if request.method == "POST" and "finish" in request.form:
+        CustomerSession.query.get(session["id"]).end = func.now()
+        return redirect(url_for("index"))
+
+    return render_template("finalized_order.html", order_num = int(order_id) % 100)
 
 
 @app.errorhandler(404)

@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block body %}
+    <h3>Your number:</h3>
+    <h1>{{ order_num }}</h1>
+    <p>Come pick up your food when you see your number on the screen</p>
+    <form method="POST">
+        <button type="submit" name="finish">Finish</button>
+    </form>
+{% endblock body %}

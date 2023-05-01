@@ -84,7 +84,6 @@ class CustomerSession(db.Model):
 
 class Order(db.Model):
     id = db.Column(db.Integer, primary_key = True)
-    number = db.Column(db.Integer, nullable = False, default = 0)
     time = db.Column(db.DateTime)
     total_price = db.Column(db.Double, nullable = False, default = 0)
     item_count = db.Column(db.Integer, nullable = False, default = 0)
@@ -92,7 +91,7 @@ class Order(db.Model):
                         default = "unsubmitted")
     session_id = db.Column(db.Integer, db.ForeignKey("customer_session.id"))
     items = db.relationship("MenuItem", secondary = "order_menu_items",
-                            backref = "order")
+                            backref = "order", uselist=True)
 
     def __repr__(self):
         return f"Order({self.id}, {self.number}, {self.total_price},"\
@@ -113,6 +112,7 @@ class Order(db.Model):
         self.total_price += item.price
         self.item_count += 1
         self.items.append(item)
+        db.session.commit()
 
     def remove_item(self, item):
         self.total_price -= item.price
