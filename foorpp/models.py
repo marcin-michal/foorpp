@@ -31,7 +31,14 @@ class MenuItem(db.Model):
     tags = db.Column(db.String, default="")
     allergens = db.Column(db.String, default="")
 
-    def update(self, form, files):
+
+    @staticmethod
+    def create(form):
+        db.session.add(MenuItem().update(form))
+        db.session.commit()
+
+
+    def update(self, form):
         self.name = form.name.data
         self.price = form.price.data
         self.description = form.description.data
@@ -42,11 +49,18 @@ class MenuItem(db.Model):
         return self
 
 
+    def remove(self):
+        MenuItem.query.filter(MenuItem.id == self.id).delete()
+        db.session.commit()
+
+
     def __repr__(self):
         return f"MenuItem({self.id}, '{self.name}', '{self.price}')"
 
+
     def __eq__(self, other):
         return self.id == other.id
+
 
     def __lt__(self, other):
         return self.id < other.id
@@ -58,6 +72,7 @@ class CustomerSession(db.Model):
     end = db.Column(db.DateTime)
     order = db.relationship("Order", backref="customer_session",
                             uselist=False)
+
 
     def __repr__(self):
         return f"CustomerSession({self.id}, '{self.start}', '{self.end}')"
@@ -73,11 +88,13 @@ class Order(db.Model):
     items = db.relationship("MenuItem", secondary="order_menu_items",
                             backref="order", uselist=True)
 
+
     def __repr__(self):
         return f"Order({self.id}, {self.number}, {self.total_price},"\
                f"{self.items}, {self.item_count}, '{self.status}')"
 
-    @classmethod
+
+    @staticmethod
     def get_current_order(self):
         if session.get("order_id") is None:
             current_order = Order()
@@ -88,16 +105,19 @@ class Order(db.Model):
 
         return Order.query.get(session["order_id"])
 
+
     def add_item(self, item):
         self.total_price += Decimal(item.price)
         self.item_count += 1
         self.items.append(item)
         db.session.commit()
 
+
     def remove_item(self, item):
         self.total_price -= item.price
         self.item_count -= 1
         self.item.remove(item)
+
 
     def empty_cart(self):
         self.total_price = 0

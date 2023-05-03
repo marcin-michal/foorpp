@@ -86,6 +86,9 @@ def item(item_id):
         return redirect(url_for("menu"))
     elif "add_to_cart" in request.form:
         add_to_cart(item_id)
+    elif "remove_item" in request.form:
+        menu_item.remove()
+        return redirect(url_for("menu"))
 
     return render_template("item.html", item=menu_item, form=form,
                            id=session["id"])
@@ -120,7 +123,7 @@ def finalized_order(order_id):
                            order_num=int(order_id) % 100)
 
 
-@app.route("/admin_login", methods=["GET", "POST"])
+@app.route("/admin-login", methods=["GET", "POST"])
 def admin_login():
     form = AdminLoginForm()
 
@@ -153,12 +156,17 @@ def orders():
     return "hahahaha"
 
 
-@app.route("/add_menu_item")
+@app.route("/add-menu-item", methods=["GET", "POST"])
 def add_menu_item():
-    return "add_menu_item"
+    form = MenuItemForm()
+    if form.validate_on_submit():
+        MenuItem().create(form)
+        return redirect(url_for("menu"))
+
+    return render_template("add_menu_item.html", form=form)
 
 
-@app.route("/add_category")
+@app.route("/add-category", methods=["GET", "POST"])
 def add_category():
     return "add_category"
 

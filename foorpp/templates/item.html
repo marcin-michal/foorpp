@@ -4,6 +4,9 @@
     <h1>{{ item.name }}</h1>
     {% if id == "admin" %}
         {% include "item_form.html" %}
+        <form method="POST">
+            <button type="Submit" name="remove_item">Remove item</button>
+        </form>
     {% else %}
         <ul>
             <li>
