@@ -8,11 +8,13 @@
                 <button type="submit">Search</button>
             </form>
         </div>
-        <div class="cart-button">
-            <form method="POST" action="{{ url_for('cart') }}">
-                <button type="submit">Cart</button>
-            </form>
-        </div>
+        {% if id != "admin" %}
+            <div class="cart-button">
+                <form method="POST" action="{{ url_for('cart') }}">
+                    <button type="submit">Cart</button>
+                </form>
+            </div>
+        {% endif %}
     </div>
 
     {% block content %} {% endblock content %}

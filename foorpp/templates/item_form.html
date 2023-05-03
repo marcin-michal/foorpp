@@ -1,0 +1,17 @@
+<form method="POST" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+    {{ form.name.label }}
+    {{ form.name }}
+    {{ form.price.label }}
+    {{ form.price }}
+    {{ form.description.label }}
+    {{ form.description }}
+    <!-- {{ form.image.label }}
+    {{ form.image }} -->
+    {{ form.tags.label }}
+    {{ form.tags }}
+    {{ form.allergens.label }}
+    {{ form.allergens }}
+    {{ form.submit }}
+</form>
+

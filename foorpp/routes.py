@@ -9,7 +9,7 @@ from flask import (
 )
 from foorpp import app, bcrypt, db
 from foorpp.filters import filter_by_keyword
-from foorpp.forms import AdminLoginForm
+from foorpp.forms import AdminLoginForm, MenuItemForm
 from foorpp.models import (
     AdminAccount,
     Category,
@@ -21,7 +21,7 @@ from foorpp.utils import add_to_cart
 from sqlalchemy import func
 
 
-@app.route("/", methods = ["GET", "POST"])
+@app.route("/", methods=["GET", "POST"])
 def index():
     session.clear()
 
@@ -37,7 +37,7 @@ def index():
     return render_template("index.html")
 
 
-@app.route("/categories", methods = ["GET", "POST"])
+@app.route("/categories", methods=["GET", "POST"])
 def categories():
     if session.get("id") is None:
         return redirect(url_for("index"))
@@ -47,10 +47,10 @@ def categories():
         return redirect(url_for("menu"))
 
     return render_template("categories.html",
-                           categories = Category.query.all())
+                           categories=Category.query.all())
 
 
-@app.route("/menu", methods = ["GET", "POST"])
+@app.route("/menu", methods=["GET", "POST"])
 def menu():
     if session.get("id") is None:
         return redirect(url_for("index"))
@@ -62,13 +62,13 @@ def menu():
     if request.method == "POST":
         add_to_cart(request.form["item_id"])
 
-    return render_template("menu.html", items = menu_items)
+    return render_template("menu.html", items=menu_items, id=session["id"])
 
 
 @app.post("/search")
 def search():
     session["keyword"] = request.form["searched"]
-    return redirect("menu")
+    return redirect(url_for("menu"))
 
 
 @app.route("/item/<item_id>", methods=["GET", "POST"])
@@ -80,13 +80,18 @@ def item(item_id):
     if menu_item is None:
         abort(404)
 
-    if request.method == "POST":
+    form = MenuItemForm(obj=menu_item)
+    if form.validate_on_submit():
+        menu.item = menu_item.update(form, request.files)
+        return redirect(url_for("menu"))
+    elif "add_to_cart" in request.form:
         add_to_cart(item_id)
 
-    return render_template("item.html", item = menu_item)
+    return render_template("item.html", item=menu_item, form=form,
+                           id=session["id"])
 
 
-@app.route("/cart", methods = ["GET", "POST"])
+@app.route("/cart", methods=["GET", "POST"])
 def cart():
     if session.get("id") is None:
         return redirect(url_for("index"))
@@ -102,7 +107,7 @@ def empty_cart():
     return redirect(url_for("cart"))
 
 
-@app.route("/order/<order_id>", methods = ["GET", "POST"])
+@app.route("/order/<order_id>", methods=["GET", "POST"])
 def finalized_order(order_id):
     Order.query.get(order_id).status = "submitted"
     db.session.commit()
@@ -112,10 +117,10 @@ def finalized_order(order_id):
         return redirect(url_for("index"))
 
     return render_template("finalized_order.html",
-                           order_num = int(order_id) % 100)
+                           order_num=int(order_id) % 100)
 
 
-@app.route("/admin_login", methods = ["GET", "POST"])
+@app.route("/admin_login", methods=["GET", "POST"])
 def admin_login():
     form = AdminLoginForm()
 
@@ -129,7 +134,7 @@ def admin_login():
 
         flash("Incorrect admin password!")
 
-    return render_template("admin_login.html", form = form, )
+    return render_template("admin_login.html", form=form, )
 
 
 @app.get("/admin")
@@ -146,6 +151,16 @@ def orders():
         return redirect(url_for("index"))
 
     return "hahahaha"
+
+
+@app.route("/add_menu_item")
+def add_menu_item():
+    return "add_menu_item"
+
+
+@app.route("/add_category")
+def add_category():
+    return "add_category"
 
 
 @app.errorhandler(404)

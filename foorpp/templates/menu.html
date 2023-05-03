@@ -1,13 +1,19 @@
 {% extends "base_w_header.html" %}
 {% block content %}
-    <h1>Our finest selection</h1>
+    {% if id == "admin" %}
+        <a href="{{ url_for('admin') }}">Back</a>
+        <a href="{{ url_for('add_menu_item') }}">Add item</a>
+        <a href="{{ url_for('add_category') }}">Add category</a>
+    {% else %}
+        <h1>Our finest selection</h1>
+    {% endif %}
     <iframe name="hidden_iframe" style="display:none;"></iframe>
     <ul>
         {% for item in items %}
             <li>
                 <ul>
                     <li>
-                        <img src="{{ url_for('static', filename='images/default.jpg') }}">
+                        <img src="{{ url_for('static', filename=item.image) }}">
                     </li>
                     <li>
                         <h1><a href="{{ url_for('item', item_id=item.id) }}">{{ item.name }}</a></h1>
@@ -21,9 +27,13 @@
                     </li>
                     {% endif %}
                     <li>
-                        <form method="POST" target="hidden_iframe">
-                            <button type="Submit" name="item_id" value="{{ item.id }}">Add to cart</a>
-                        </form>
+                        {% if id == "admin" %}
+                            <a href="{{ url_for('item', item_id=item.id) }}">Edit item</a>
+                        {% else %}
+                            <form method="POST" target="hidden_iframe">
+                                <button type="Submit" name="item_id" value="{{ item.id }}">Add to cart</a>
+                            </form>
+                        {% endif %}
                     </li>
                 </ul>
             </li>
