@@ -9,7 +9,7 @@ from flask import (
 )
 from foorpp import app, bcrypt, db
 from foorpp.filters import filter_by_keyword
-from foorpp.forms import AdminLoginForm, MenuItemForm
+from foorpp.forms import AdminLoginForm, CategoryForm, MenuItemForm
 from foorpp.models import (
     AdminAccount,
     Category,
@@ -112,6 +112,9 @@ def empty_cart():
 
 @app.route("/order/<order_id>", methods=["GET", "POST"])
 def finalized_order(order_id):
+    if session.get("id") is None:
+        return redirect(url_for("index"))
+
     Order.query.get(order_id).status = "submitted"
     db.session.commit()
 
@@ -158,6 +161,9 @@ def orders():
 
 @app.route("/add-menu-item", methods=["GET", "POST"])
 def add_menu_item():
+    if session.get("id") != "admin":
+        return redirect(url_for("index"))
+
     form = MenuItemForm()
     if form.validate_on_submit():
         MenuItem().create(form)
@@ -166,9 +172,23 @@ def add_menu_item():
     return render_template("add_menu_item.html", form=form)
 
 
-@app.route("/add-category", methods=["GET", "POST"])
-def add_category():
-    return "add_category"
+@app.route("/category-manager", methods=["GET", "POST"])
+def category_manager():
+    if session.get("id") != "admin":
+        return redirect(url_for("index"))
+
+    print("haloooo")
+    form = CategoryForm()
+    if form.validate_on_submit():
+        Category.create(form)
+    elif "remove_category" in request.form:
+        Category.query.filter(Category.id == request.form["remove_category"]).delete()
+        db.session.commit()
+
+    categories = Category.query.all()
+
+    return render_template("category_manager.html", form=form,
+                           categories=categories)
 
 
 @app.errorhandler(404)

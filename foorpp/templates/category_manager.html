@@ -1,0 +1,17 @@
+{% extends "base_w_header.html" %}
+
+{% block content %}
+    {% for category in categories %}
+        {{ category.name }}
+        <form method="POST">
+            <button type="Submit" name="remove_category" value="{{ category.id }}">Remove category</button>
+        <br>
+        </form>
+    {% endfor %}
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        {{ form.name.legend }}
+        {{ form.name }}
+        {{ form.submit }}
+    </form>
+{% endblock content %}

@@ -25,3 +25,9 @@ class MenuItemForm(FlaskForm):
     tags = TextAreaField("Tags")
     allergens = TextAreaField("Allergens")
     submit = SubmitField("Save item")
+
+
+class CategoryForm(FlaskForm):
+    name = StringField("Category name", validators=[DataRequired(),
+                                                    Length(min=1, max=20)])
+    submit = SubmitField("Add category")

@@ -13,11 +13,18 @@ order_menu_items = db.Table("order_menu_items",
 
 
 class Category(db.Model):
-    name = db.Column(db.String(20), nullable=False, primary_key=True)
-    value = db.Column(db.String(20), nullable=False)
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(20), nullable=False)
+
 
     def __repr__(self):
-        return f"Category('{self.category_name}', '{self.category_value}')"
+        return f"Category('{self.category_name}')"
+
+
+    @staticmethod
+    def create(form):
+        db.session.add(Category(name=form.name.data))
+        db.session.commit()
 
 
 @total_ordering
@@ -95,7 +102,7 @@ class Order(db.Model):
 
 
     @staticmethod
-    def get_current_order(self):
+    def get_current_order():
         if session.get("order_id") is None:
             current_order = Order()
             db.session.add(current_order)

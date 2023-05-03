@@ -5,10 +5,10 @@ db.drop_all()
 db.create_all()
 
 # Init categories
-db.session.add(Category(name="pizza", value="Pizza"))
-db.session.add(Category(name="burger", value="Burger"))
-db.session.add(Category(name="sushi", value="Sushi"))
-db.session.add(Category(name="mexican", value="Mexican"))
+db.session.add(Category(name="pizza"))
+db.session.add(Category(name="burger"))
+db.session.add(Category(name="sushi"))
+db.session.add(Category(name="mexican"))
 
 # Init allergens
 # al01 = Allergen(allergen = "Cereals containing gluten")
