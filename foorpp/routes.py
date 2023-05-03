@@ -9,7 +9,12 @@ from flask import (
 )
 from foorpp import app, bcrypt, db
 from foorpp.filters import filter_by_keyword
-from foorpp.forms import AdminLoginForm, CategoryForm, MenuItemForm
+from foorpp.forms import (
+    AdminLoginForm,
+    CategoryForm,
+    MenuItemForm,
+    OrderStatusForm
+)
 from foorpp.models import (
     AdminAccount,
     Category,
@@ -46,8 +51,8 @@ def categories():
         session["keyword"] = request.form.get("searched")
         return redirect(url_for("menu"))
 
-    return render_template("categories.html",
-                           categories=Category.query.all())
+    return render_template("categories.html", id=session["id"],
+                           categories=Category.query.all(), back_page="index")
 
 
 @app.route("/menu", methods=["GET", "POST"])
@@ -55,6 +60,7 @@ def menu():
     if session.get("id") is None:
         return redirect(url_for("index"))
 
+    back_page = "admin" if session["id"] == "admin" else "categories"
     keyword = session.get("keyword")
     menu_items = filter_by_keyword(keyword if keyword is None
                                    else keyword.strip().lower())
@@ -62,7 +68,8 @@ def menu():
     if request.method == "POST":
         add_to_cart(request.form["item_id"])
 
-    return render_template("menu.html", items=menu_items, id=session["id"])
+    return render_template("menu.html", items=menu_items, id=session["id"],
+                           back_page=back_page)
 
 
 @app.post("/search")
@@ -91,7 +98,7 @@ def item(item_id):
         return redirect(url_for("menu"))
 
     return render_template("item.html", item=menu_item, form=form,
-                           id=session["id"])
+                           id=session["id"], back_page="menu")
 
 
 @app.route("/cart", methods=["GET", "POST"])
@@ -101,7 +108,8 @@ def cart():
 
     order = Order.get_current_order()
 
-    return render_template("cart.html", order=order)
+    return render_template("cart.html", order=order, back_page="menu",
+                           id=session["id"])
 
 
 @app.post("/empty_cart")
@@ -115,7 +123,9 @@ def finalized_order(order_id):
     if session.get("id") is None:
         return redirect(url_for("index"))
 
-    Order.query.get(order_id).status = "submitted"
+    current_order = Order.query.get(order_id)
+    current_order.status = "submitted"
+    current_order.time = func.now()
     db.session.commit()
 
     if request.method == "POST" and "finish" in request.form:
@@ -140,7 +150,7 @@ def admin_login():
 
         flash("Incorrect admin password!")
 
-    return render_template("admin_login.html", form=form, )
+    return render_template("admin_login.html", form=form)
 
 
 @app.get("/admin")
@@ -156,7 +166,10 @@ def orders():
     if session.get("id") != "admin":
         return redirect(url_for("index"))
 
-    return "hahahaha"
+    orders = Order.query.all()
+
+    return render_template("orders.html", id=session["id"], orders=orders,
+                           back_page="admin")
 
 
 @app.route("/add-menu-item", methods=["GET", "POST"])
@@ -169,7 +182,8 @@ def add_menu_item():
         MenuItem().create(form)
         return redirect(url_for("menu"))
 
-    return render_template("add_menu_item.html", form=form)
+    return render_template("add_menu_item.html", form=form, back_page="menu",
+                           id=session["id"])
 
 
 @app.route("/category-manager", methods=["GET", "POST"])
@@ -187,10 +201,29 @@ def category_manager():
 
     categories = Category.query.all()
 
-    return render_template("category_manager.html", form=form,
-                           categories=categories)
+    return render_template("category_manager.html", categories=categories,
+                           form=form, back_page="admin", id=session["id"])
+
+
+@app.route("/order-manager/<order_id>", methods=["GET", "POST"])
+def order_manager(order_id):
+    if session["id"] != "admin":
+        return redirect(url_for("index"))
+
+    current_order = Order.query.get(order_id)
+    if current_order is None:
+        abort(404)
+
+    form = OrderStatusForm()
+    if form.validate():
+        current_order.status = form.status.data
+        db.session.commit()
+        return redirect(url_for("order_manager", order_id=order_id))
+
+    return render_template("order.html", back_page="orders", id=session["id"],
+                           order=current_order, form=form)
 
 
 @app.errorhandler(404)
 def page_not_found(_):
-    return render_template("404.html")
+    return render_template("404.html", back_page="index")

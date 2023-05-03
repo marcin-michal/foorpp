@@ -97,14 +97,14 @@ class Order(db.Model):
 
 
     def __repr__(self):
-        return f"Order({self.id}, {self.number}, {self.total_price},"\
+        return f"Order({self.id}, {self.total_price},"\
                f"{self.items}, {self.item_count}, '{self.status}')"
 
 
     @staticmethod
     def get_current_order():
         if session.get("order_id") is None:
-            current_order = Order()
+            current_order = Order(session_id=session["id"])
             db.session.add(current_order)
             db.session.commit()
             session["order_id"] = current_order.id

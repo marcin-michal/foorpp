@@ -16,6 +16,11 @@
             </div>
         {% endif %}
     </div>
+    <a href="{{ url_for(back_page) }}">Back</a>
+    {% if id == "admin" %}
+        <a href="{{ url_for('index') }}">Logout</a>
+    {% endif %}
 
+    <br><br><br>
     {% block content %} {% endblock content %}
 {% endblock body %}

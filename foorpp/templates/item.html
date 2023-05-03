@@ -1,5 +1,6 @@
 {% extends "base_w_header.html" %}
 {% block content %}
+    <a href="{{ url_for('admin') }}">Back</a>
     <img src="{{ url_for('static', filename=item.image) }}">
     <h1>{{ item.name }}</h1>
     {% if id == "admin" %}

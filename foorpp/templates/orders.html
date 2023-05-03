@@ -1,0 +1,26 @@
+{% extends "base_w_header.html" %}
+
+{% block content %}
+    <h1>Orders</h1>
+
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Time placed</th>
+            <th>Session</th>
+            <th>Status</th>
+            <th>Details</th>
+        </tr>
+        {% for order in orders %}
+            <tr>
+                <td> {{ order.id }} </td>
+                <td> {{ order.time }} </td>
+                <td> {{ order.session_id }} </td>
+                <td> {{ order.status }} </td>
+                <td> <a href="{{ url_for('order_manager', order_id=order.id) }}">Details</a></td>
+            </tr>
+        {% endfor %}
+        </tr>
+    </table>
+
+{% endblock content %}

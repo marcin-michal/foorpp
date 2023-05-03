@@ -3,6 +3,7 @@ from flask_wtf.file import FileAllowed, FileField
 from wtforms import (
     DecimalField,
     PasswordField,
+    SelectField,
     StringField,
     SubmitField,
     TextAreaField
@@ -31,3 +32,12 @@ class CategoryForm(FlaskForm):
     name = StringField("Category name", validators=[DataRequired(),
                                                     Length(min=1, max=20)])
     submit = SubmitField("Add category")
+
+
+class OrderStatusForm(FlaskForm):
+    status = SelectField("Status", choices=[("unsubmitted", "Unsubmitted"),
+                                            ("submitted", "Submitted"),
+                                            ("prepared", "Prepared"),
+                                            ("finished", "Finished"),
+                                            ("cancelled", "Cancelled")])
+    submit = SubmitField("Save")
