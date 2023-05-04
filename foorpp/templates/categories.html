@@ -7,13 +7,13 @@
             {% for category in categories %}
                 <li>
                     <form method="POST" action="">
-                        <input type="submit" name="searched" value="{{ category.name }}">
+                        <input type="submit" name="category" value="{{ category.name }}">
                     </form>
                 </li>
             {% endfor %}
             <li>
                 <form method="POST" action="">
-                    <input type="submit" name="_" value="Show me everything!">
+                    <input type="submit" name="category" value="Show me everything!">
                 </form>
             </li>
         </ul>

@@ -14,8 +14,8 @@ order_menu_items = db.Table("order_menu_items",
 
 class Category(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(20), nullable=False)
-
+    name = db.Column(db.String(20), nullable=False, unique=True)
+    menu_items = db.relationship("MenuItem", backref="category")
 
     def __repr__(self):
         return f"Category('{self.category_name}')"
@@ -35,6 +35,7 @@ class MenuItem(db.Model):
     description = db.Column(db.String(1000))
     image = db.Column(db.String(50), nullable=False,
                       default="images/default.png")
+    category_id = db.Column(db.Integer, db.ForeignKey("category.id"))
     tags = db.Column(db.String, default="")
     allergens = db.Column(db.String, default="")
 

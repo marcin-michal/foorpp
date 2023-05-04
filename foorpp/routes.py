@@ -8,7 +8,7 @@ from flask import (
     url_for
 )
 from foorpp import app, bcrypt, db
-from foorpp.filters import filter_by_keyword
+from foorpp.filters import filter_by_category, filter_by_keyword
 from foorpp.forms import (
     AdminLoginForm,
     CategoryForm,
@@ -48,7 +48,7 @@ def categories():
         return redirect(url_for("index"))
 
     if request.method == "POST":
-        session["keyword"] = request.form.get("searched")
+        session["category"] = request.form.get("category")
         return redirect(url_for("menu"))
 
     return render_template("categories.html", id=session["id"],
@@ -61,9 +61,15 @@ def menu():
         return redirect(url_for("index"))
 
     back_page = "admin" if session["id"] == "admin" else "categories"
-    keyword = session.get("keyword")
-    menu_items = filter_by_keyword(keyword if keyword is None
-                                   else keyword.strip().lower())
+
+    if session.get("category") is not None:
+        menu_items = filter_by_category(session.get("category"))
+        session.pop("category", None)
+        session["keyword"] = None
+    else:
+        keyword = session.get("keyword")
+        menu_items = filter_by_keyword(keyword if keyword is None
+                                       else keyword.strip().lower())
 
     if request.method == "POST":
         add_to_cart(request.form["item_id"])
