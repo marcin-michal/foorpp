@@ -63,7 +63,8 @@ class MenuItem(db.Model):
 
 
     def __repr__(self):
-        return f"MenuItem({self.id}, '{self.name}', '{self.price}')"
+        return f"MenuItem({self.id}, '{self.name}', '{self.price}'," \
+               f"{self.category_id})"
 
 
     def __eq__(self, other):

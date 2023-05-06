@@ -8,7 +8,7 @@ from flask import (
     url_for
 )
 from foorpp import app, bcrypt, db
-from foorpp.filters import filter_by_category, filter_by_keyword
+from foorpp.filters import filtered_items
 from foorpp.forms import (
     AdminLoginForm,
     CategoryForm,
@@ -48,7 +48,11 @@ def categories():
         return redirect(url_for("index"))
 
     if request.method == "POST":
-        session["category"] = request.form.get("category")
+        category = request.form.get("category")
+        session["categories"] = [] if category == "Show me everything!" \
+            else [Category.query.filter(Category.name == category).first().id]
+        session["keyword"] = None
+
         return redirect(url_for("menu"))
 
     return render_template("categories.html", id=session["id"],
@@ -61,15 +65,8 @@ def menu():
         return redirect(url_for("index"))
 
     back_page = "admin" if session["id"] == "admin" else "categories"
-
-    if session.get("category") is not None:
-        menu_items = filter_by_category(session.get("category"))
-        session.pop("category", None)
-        session["keyword"] = None
-    else:
-        keyword = session.get("keyword")
-        menu_items = filter_by_keyword(keyword if keyword is None
-                                       else keyword.strip().lower())
+    menu_items = filtered_items(session.get("categories"),
+                                session.get("keyword"))
 
     if request.method == "POST":
         add_to_cart(request.form["item_id"])
@@ -152,6 +149,7 @@ def admin_login():
         if admin_login and bcrypt.check_password_hash(admin_account.password,
                                                       form.password.data):
             session["id"] = "admin"
+
             return redirect(url_for("admin"))
 
         flash("Incorrect admin password!")
@@ -228,6 +226,14 @@ def order_manager(order_id):
 
     return render_template("order.html", back_page="orders", id=session["id"],
                            order=current_order, form=form)
+
+
+@app.route("/filter-items", methods=["GET", "POST"])
+def filter_items():
+    if session.get("id") is None:
+        return redirect(url_for("index"))
+
+    return render_template("filter_items.html")
 
 
 @app.errorhandler(404)

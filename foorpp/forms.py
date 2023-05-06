@@ -8,7 +8,7 @@ from wtforms import (
     SubmitField,
     TextAreaField
 )
-from wtforms.validators import DataRequired, Length
+from wtforms.validators import DataRequired, NumberRange, Length
 
 
 class AdminLoginForm(FlaskForm):
@@ -19,7 +19,8 @@ class AdminLoginForm(FlaskForm):
 class MenuItemForm(FlaskForm):
     name = StringField("Name", validators=[DataRequired(),
                                              Length(min=1, max=40)])
-    price = DecimalField("Price", places=2, validators=[DataRequired()])
+    price = DecimalField("Price", places=2, validators=[DataRequired(),
+                                                        NumberRange(min=0)])
     description = TextAreaField("Description")
     image = FileField("Photo",
                       validators=[FileAllowed(['png', 'jpg', 'jpeg'])])

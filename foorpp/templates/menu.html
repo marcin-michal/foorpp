@@ -6,6 +6,7 @@
         <h1>Our finest selection</h1>
     {% endif %}
     <iframe name="hidden_iframe" style="display:none;"></iframe>
+    {% if items|length > 0 %}
     <ul>
         {% for item in items %}
             <li>
@@ -37,4 +38,8 @@
             </li>
         {% endfor %}
     </ul>
+    {% else %}
+        <img src="{{ url_for('static', filename='images/empty-search.gif') }}">
+        <p>No items matching your search, try something else...</p>
+    {% endif %}
 {% endblock content %}
