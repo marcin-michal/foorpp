@@ -5,11 +5,10 @@ from functools import total_ordering
 from sqlalchemy import func
 
 
-order_menu_items = db.Table("order_menu_items",
-                            db.Column("order_id", db.Integer,
-                                      db.ForeignKey("order.id")),
-                            db.Column("menu_item_id", db.Integer,
-                                      db.ForeignKey("menu_item.id")))
+order_items = db.Table("order_items",
+                       db.Column("order_id", db.Integer, db.ForeignKey("order.id")),
+                       db.Column("item_id", db.Integer, db.ForeignKey("menu_item.id")),
+                       db.Column("count", db.Integer, default=1))
 
 
 class Category(db.Model):
@@ -35,9 +34,10 @@ class MenuItem(db.Model):
     description = db.Column(db.String(1000))
     image = db.Column(db.String(50), nullable=False,
                       default="images/default.png")
-    category_id = db.Column(db.Integer, db.ForeignKey("category.id"))
     tags = db.Column(db.String, default="")
     allergens = db.Column(db.String, default="")
+    category_id = db.Column(db.Integer, db.ForeignKey("category.id"))
+    # order_id = db.Column(db.Integer, db.ForeignKey("order.id"))
 
 
     @staticmethod
@@ -94,8 +94,8 @@ class Order(db.Model):
     item_count = db.Column(db.Integer, nullable=False, default=0)
     status = db.Column(db.String(20), nullable=False, default = "unsubmitted")
     session_id = db.Column(db.Integer, db.ForeignKey("customer_session.id"))
-    items = db.relationship("MenuItem", secondary="order_menu_items",
-                            backref="order", uselist=True)
+    items = db.relationship("MenuItem", secondary="order_items",
+                            backref="orders")
 
 
     def __repr__(self):
@@ -118,14 +118,40 @@ class Order(db.Model):
     def add_item(self, item):
         self.total_price += Decimal(item.price)
         self.item_count += 1
-        self.items.append(item)
+
+        order_item = db.session.query(order_items).filter(
+            order_items.c.order_id==self.id,
+            order_items.c.item_id==item.id
+        ).first()
+
+        if order_item is None:
+            self.items.append(item)
+        else:
+            db.session.query(order_items).filter(
+                order_items.c.order_id==self.id,
+                order_items.c.item_id==item.id
+            ).update({"count": order_items.c.count + 1})
+
         db.session.commit()
 
 
     def remove_item(self, item):
         self.total_price -= item.price
         self.item_count -= 1
-        self.item.remove(item)
+
+        db.session.query(order_items).filter(
+            order_items.c.order_id==self.id,
+            order_items.c.item_id==item.id
+        ).update({"count": order_items.c.count - 1})
+
+        order_item = db.session.query(order_items).filter(
+            order_items.c.order_id==self.id,
+            order_items.c.item_id==item.id
+        ).first()
+        if order_item.count == 0:
+            db.session.delete(order_item)
+
+        db.session.commit()
 
 
     def empty_cart(self):
