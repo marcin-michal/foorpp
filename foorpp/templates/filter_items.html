@@ -1,0 +1,24 @@
+{% extends "base_w_header.html" %}
+
+{% block content %}
+
+<a href="{{ url_for('clear_filters_button', back_page='filter_items') }}">Clear filters</a>
+
+<form method="POST">
+    {{ form.hidden_tag() }}
+    <div>
+        {{ form.categories.label }}
+        {{ form.categories }}
+    </div>
+    <div>
+        {{ form.diets.label }}
+        {{ form.diets }}
+    </div>
+    <div>
+        {{ form.excluded_allergens.label }}
+        {{ form.excluded_allergens }}
+    </div>
+        {{ form.submit }}
+</form>
+
+{% endblock content %}

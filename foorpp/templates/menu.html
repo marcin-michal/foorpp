@@ -1,11 +1,17 @@
 {% extends "base_w_header.html" %}
+
 {% block content %}
+
     {% if id == "admin" %}
         <a href="{{ url_for('add_menu_item') }}">Add item</a>
     {% else %}
         <h1>Our finest selection</h1>
     {% endif %}
+
     <iframe name="hidden_iframe" style="display:none;"></iframe>
+    <a href="{{ url_for('filter_items') }}">Filters</a>
+    <a href="{{ url_for('clear_filters_button', back_page='menu') }}">Clear filters</a>
+    <br><br>
     {% if items|length > 0 %}
     <ul>
         {% for item in items %}
@@ -42,4 +48,5 @@
         <img src="{{ url_for('static', filename='images/empty-search.gif') }}">
         <p>No items matching your search, try something else...</p>
     {% endif %}
+
 {% endblock content %}

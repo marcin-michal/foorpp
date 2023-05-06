@@ -4,11 +4,38 @@ from wtforms import (
     DecimalField,
     PasswordField,
     SelectField,
+    SelectMultipleField,
     StringField,
     SubmitField,
-    TextAreaField
+    TextAreaField,
+    widgets
 )
 from wtforms.validators import DataRequired, NumberRange, Length
+from wtforms_alchemy import QuerySelectMultipleField
+
+
+ALLERGEN_CHOICES = [
+    "Celery",
+    "Cereals containing gluten",
+    "Crustaceans",
+    "Eggs",
+    "Fish",
+    "Lupin",
+    "Milk",
+    "Molluscs",
+    "Mustard",
+    "Nuts",
+    "Peanuts",
+    "Sesame seeds",
+    "Soya",
+    "Sulphur dioxide"
+]
+DIETS_CHOICES = [
+    "Vegan",
+    "Vegetarian",
+    "Dairy-free",
+    "Gluten-free"
+]
 
 
 class AdminLoginForm(FlaskForm):
@@ -29,7 +56,7 @@ class MenuItemForm(FlaskForm):
     submit = SubmitField("Save item")
 
 
-class CategoryForm(FlaskForm):
+class CategoryAddForm(FlaskForm):
     name = StringField("Category name", validators=[DataRequired(),
                                                     Length(min=1, max=20)])
     submit = SubmitField("Add category")
@@ -42,3 +69,20 @@ class OrderStatusForm(FlaskForm):
                                             ("finished", "Finished"),
                                             ("cancelled", "Cancelled")])
     submit = SubmitField("Save")
+
+
+class QuerySelectMultipleFieldWithCheckboxes(QuerySelectMultipleField):
+    widget = widgets.ListWidget(prefix_label=False)
+    option_widget = widgets.CheckboxInput()
+
+class SelectMultipleFieldWithCheckboxes(SelectMultipleField):
+    widget = widgets.ListWidget(prefix_label=False)
+    option_widget = widgets.CheckboxInput()
+
+
+class FilterForm(FlaskForm):
+    categories = QuerySelectMultipleFieldWithCheckboxes("Category")
+    diets = SelectMultipleFieldWithCheckboxes("Diet", choices=DIETS_CHOICES)
+    excluded_allergens = SelectMultipleFieldWithCheckboxes(
+        "Excluded allergens", choices=ALLERGEN_CHOICES)
+    submit = SubmitField("Show items")

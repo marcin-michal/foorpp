@@ -11,7 +11,8 @@ from foorpp import app, bcrypt, db
 from foorpp.filters import filtered_items
 from foorpp.forms import (
     AdminLoginForm,
-    CategoryForm,
+    CategoryAddForm,
+    FilterForm,
     MenuItemForm,
     OrderStatusForm
 )
@@ -22,7 +23,7 @@ from foorpp.models import (
     MenuItem,
     Order
 )
-from foorpp.utils import add_to_cart
+from foorpp.utils import add_to_cart, clear_filters, selected_categories
 from sqlalchemy import func
 
 
@@ -47,6 +48,8 @@ def categories():
     if session.get("id") is None:
         return redirect(url_for("index"))
 
+    clear_filters(session)
+
     if request.method == "POST":
         category = request.form.get("category")
         session["categories"] = [] if category == "Show me everything!" \
@@ -65,8 +68,12 @@ def menu():
         return redirect(url_for("index"))
 
     back_page = "admin" if session["id"] == "admin" else "categories"
-    menu_items = filtered_items(session.get("categories"),
-                                session.get("keyword"))
+    menu_items = filtered_items(
+        session.get("categories"),
+        session.get("keyword"),
+        session.get("diets"),
+        session.get("excluded_allergens")
+    )
 
     if request.method == "POST":
         add_to_cart(request.form["item_id"])
@@ -77,7 +84,9 @@ def menu():
 
 @app.post("/search")
 def search():
+    clear_filters(session)
     session["keyword"] = request.form["searched"]
+
     return redirect(url_for("menu"))
 
 
@@ -196,7 +205,7 @@ def category_manager():
         return redirect(url_for("index"))
 
     print("haloooo")
-    form = CategoryForm()
+    form = CategoryAddForm()
     if form.validate_on_submit():
         Category.create(form)
     elif "remove_category" in request.form:
@@ -233,8 +242,28 @@ def filter_items():
     if session.get("id") is None:
         return redirect(url_for("index"))
 
-    return render_template("filter_items.html")
+    form = FilterForm(data={
+        "categories": selected_categories(session.get("categories")),
+        "diets": [] if session.get("diets") is None else session.get("diets"),
+        "allergens": [] if session.get("excluded_allergens") is None
+            else session.get("excluded_allergens")
+    })
+    form.categories.query = Category.query.all()
 
+    if form.validate_on_submit():
+        session["categories"] = [cat.id for cat in form.categories.data]
+        session["diets"] = form.diets.data
+        session["excluded_allergens"] = form.excluded_allergens.data
+
+        return redirect(url_for("menu"))
+
+    return render_template("filter_items.html", form=form, back_page="menu")
+
+@app.route("/clear-filters/<back_page>")
+def clear_filters_button(back_page):
+    clear_filters(session)
+    print(back_page)
+    return redirect(url_for(back_page))
 
 @app.errorhandler(404)
 def page_not_found(_):

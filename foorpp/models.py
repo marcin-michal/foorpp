@@ -18,7 +18,7 @@ class Category(db.Model):
     menu_items = db.relationship("MenuItem", backref="category")
 
     def __repr__(self):
-        return f"Category('{self.category_name}')"
+        return self.name
 
 
     @staticmethod
