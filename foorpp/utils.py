@@ -25,3 +25,4 @@ def clear_filters(session):
     session["keyword"] = None
     session["excluded_allergens"] = None
     session["diets"] = None
+    session["ordering"] = None

@@ -36,6 +36,12 @@ DIETS_CHOICES = [
     "Dairy-free",
     "Gluten-free"
 ]
+ORDERING_CHOICES = {
+    "Ascending by price ",
+    "Descending by price",
+    "Ascending by name",
+    "Descending by name"
+}
 
 
 class AdminLoginForm(FlaskForm):
@@ -85,4 +91,5 @@ class FilterForm(FlaskForm):
     diets = SelectMultipleFieldWithCheckboxes("Diet", choices=DIETS_CHOICES)
     excluded_allergens = SelectMultipleFieldWithCheckboxes(
         "Excluded allergens", choices=ALLERGEN_CHOICES)
+    ordering = SelectField("Order by", choices=ORDERING_CHOICES)
     submit = SubmitField("Show items")

@@ -73,7 +73,8 @@ def menu():
         session.get("categories"),
         session.get("keyword"),
         session.get("diets"),
-        session.get("excluded_allergens")
+        session.get("excluded_allergens"),
+        session.get("ordering")
     )
 
     if request.method == "POST":
@@ -224,7 +225,6 @@ def category_manager():
     if session.get("id") != "admin":
         return redirect(url_for("index"))
 
-    print("haloooo")
     form = CategoryAddForm()
     if form.validate_on_submit():
         Category.create(form)
@@ -266,7 +266,8 @@ def filter_items():
         "categories": selected_categories(session.get("categories")),
         "diets": [] if session.get("diets") is None else session.get("diets"),
         "allergens": [] if session.get("excluded_allergens") is None
-            else session.get("excluded_allergens")
+            else session.get("excluded_allergens"),
+        "ordering": session.get("ordering")
     })
     form.categories.query = Category.query.all()
 
@@ -274,6 +275,7 @@ def filter_items():
         session["categories"] = [cat.id for cat in form.categories.data]
         session["diets"] = form.diets.data
         session["excluded_allergens"] = form.excluded_allergens.data
+        session["ordering"] = form.ordering.data
 
         return redirect(url_for("menu"))
 
@@ -285,7 +287,6 @@ def clear_filters_button(back_page):
         return redirect(url_for("index"))
 
     clear_filters(session)
-    print(back_page)
     return redirect(url_for(back_page))
 
 @app.errorhandler(404)

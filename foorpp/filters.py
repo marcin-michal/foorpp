@@ -1,14 +1,22 @@
 from foorpp.models import MenuItem
-from sqlalchemy import not_, or_
+from sqlalchemy import asc, func, not_, or_
 
 
-def filtered_items(categories, keyword, diets, excluded_allergens):
+def filtered_items(categories, keyword, diets, excluded_allergens, ordering):
     query = filter_by_category(categories)
     query = query.intersect(filter_by_keyword(keyword))
     query = query.intersect(filter_by_diet(diets))
     query = query.intersect(filter_by_allergens(excluded_allergens))
 
-    return query.all()
+    if ordering is None or "name" in ordering.lower():
+        items = query.order_by(asc(func.lower(MenuItem.name))).all()
+    else:
+        items = query.order_by(asc(MenuItem.price)).all()
+
+    if ordering is None or "ascending" in ordering.lower():
+        return items
+
+    return list(reversed(items))
 
 
 def filter_by_keyword(keyword):
