@@ -21,7 +21,8 @@ from foorpp.models import (
     Category,
     CustomerSession,
     MenuItem,
-    Order
+    Order,
+    order_items
 )
 from foorpp.utils import add_to_cart, clear_filters, selected_categories
 from sqlalchemy import func
@@ -118,10 +119,29 @@ def cart():
     if session.get("id") is None:
         return redirect(url_for("index"))
 
-    order = Order.get_current_order()
+    current_order = Order.get_current_order()
 
-    return render_template("cart.html", order=order, back_page="menu",
-                           id=session["id"])
+    if request.method == "POST" and "edit_item" in request.form:
+        data = request.form["edit_item"]
+        operation = data[0]
+        current_item = MenuItem.query.get(data[1:])
+
+        if operation == "i":
+            current_order.add_item(current_item)
+        elif operation == "d":
+            current_order.decrease_item(current_item, 1)
+        elif operation == "r":
+            count = db.session.query(order_items).filter(
+                order_items.c.order_id==current_order.id,
+                order_items.c.item_id==current_item.id
+            ).first().count
+
+            current_order.decrease_item(current_item, count)
+
+    item_counts = current_order.get_item_counts()
+
+    return render_template("cart.html", order=current_order, back_page="menu",
+                           id=session["id"], item_counts=item_counts)
 
 
 @app.post("/empty_cart")
@@ -261,6 +281,9 @@ def filter_items():
 
 @app.route("/clear-filters/<back_page>")
 def clear_filters_button(back_page):
+    if session.get("id") is None:
+        return redirect(url_for("index"))
+
     clear_filters(session)
     print(back_page)
     return redirect(url_for(back_page))

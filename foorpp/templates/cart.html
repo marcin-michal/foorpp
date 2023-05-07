@@ -10,24 +10,24 @@
         {% for item in order.items %}
             <ul>
                 <li>
-                    <form method="POST" target="hidden_iframe">
-                        <button type="submit" name="increase_item" value="{{ item.id }}">+</button>
+                    <form method="POST">
+                        <button type="submit" name="edit_item" value="i{{ item.id }}">+</button>
                     </form>
                 </li>
                 <li>
-                    {{ item.count }}x
+                    {{ item_counts[item.id] }}x {{ item.price }}
                 </li>
                 <li>
-                    <form method="POST" target="hidden_iframe">
-                        <button type="submit" name="decrease_item" value="{{ item.id }}">-</button>
+                    <form method="POST">
+                        <button type="submit" name="edit_item" value="d{{ item.id }}">-</button>
                     </form>
                 </li>
                 <li>
                     {{ item.name }}
                 </li>
                 <li>
-                    <form method="POST" target="hidden_iframe">
-                        <button type="submit" name="remove_item" value="{{ item.id }}">🗑</button>
+                    <form method="POST">
+                        <button type="submit" name="edit_item" value="r{{ item.id }}">🗑</button>
                     </form>
                 </li>
             </ul>

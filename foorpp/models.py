@@ -103,18 +103,6 @@ class Order(db.Model):
                f"{self.items}, {self.item_count}, '{self.status}')"
 
 
-    @staticmethod
-    def get_current_order():
-        if session.get("order_id") is None:
-            current_order = Order(session_id=session["id"])
-            db.session.add(current_order)
-            db.session.commit()
-            session["order_id"] = current_order.id
-            return current_order
-
-        return Order.query.get(session["order_id"])
-
-
     def add_item(self, item):
         self.total_price += Decimal(item.price)
         self.item_count += 1
@@ -135,21 +123,23 @@ class Order(db.Model):
         db.session.commit()
 
 
-    def remove_item(self, item):
-        self.total_price -= item.price
-        self.item_count -= 1
-
+    def decrease_item(self, item, count):
+        self.total_price -= item.price * count
+        self.item_count -= count
         db.session.query(order_items).filter(
             order_items.c.order_id==self.id,
             order_items.c.item_id==item.id
-        ).update({"count": order_items.c.count - 1})
+        ).update({"count": order_items.c.count - count})
+
+        db.session.commit()
 
         order_item = db.session.query(order_items).filter(
             order_items.c.order_id==self.id,
             order_items.c.item_id==item.id
         ).first()
+
         if order_item.count == 0:
-            db.session.delete(order_item)
+            self.items.remove(item)
 
         db.session.commit()
 
@@ -159,6 +149,29 @@ class Order(db.Model):
         self.item_count = 0
         self.items.clear()
         db.session.commit()
+
+
+    def get_item_counts(self):
+        item_counts = {}
+
+        for order_item in db.session.query(order_items).filter(
+            order_items.c.order_id==self.id,
+        ).all():
+            item_counts[order_item.item_id] = order_item.count
+
+        return item_counts
+
+
+    @staticmethod
+    def get_current_order():
+        if session.get("order_id") is None:
+            current_order = Order(session_id=session["id"])
+            db.session.add(current_order)
+            db.session.commit()
+            session["order_id"] = current_order.id
+            return current_order
+
+        return Order.query.get(session["order_id"])
 
 
 class AdminAccount(db.Model):
