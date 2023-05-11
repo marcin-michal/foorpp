@@ -1,8 +1,14 @@
 from decimal import Decimal
-from flask import session
-from foorpp import db
+from flask import session, url_for
+from foorpp import app, db
 from functools import total_ordering
 from sqlalchemy import func
+from werkzeug.utils import secure_filename
+import os
+import uuid
+
+
+DEFAULT_IMAGE = "images/default.jpg"
 
 
 order_items = db.Table("order_items",
@@ -33,31 +39,40 @@ class MenuItem(db.Model):
     price = db.Column(db.Numeric(10, 2), nullable=False)
     description = db.Column(db.String(1000))
     image = db.Column(db.String(50), nullable=False,
-                      default="images/default.png")
+                      default=DEFAULT_IMAGE)
     tags = db.Column(db.String, default="")
     allergens = db.Column(db.String, default="")
     category_id = db.Column(db.Integer, db.ForeignKey("category.id"))
-    # order_id = db.Column(db.Integer, db.ForeignKey("order.id"))
 
 
     @staticmethod
-    def create(form):
-        db.session.add(MenuItem().update(form))
+    def create(form, image):
+        db.session.add(MenuItem().update(form, image))
         db.session.commit()
 
 
-    def update(self, form):
+    def update(self, form, image):
         self.name = form.name.data
         self.price = form.price.data
         self.description = form.description.data
         self.tags = form.tags.data
         self.allergens = form.allergens.data
+
+        if image.filename != "":
+            filename = f"{str(uuid.uuid1())}_{secure_filename(image.filename)}"
+            self.image = "images/" + filename
+            image_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+            image.save(image_path)
+
         db.session.commit()
 
         return self
 
 
     def remove(self):
+        if self.image != DEFAULT_IMAGE:
+            os.remove("foorpp/" + url_for("static", filename=self.image))
+
         MenuItem.query.filter(MenuItem.id == self.id).delete()
         db.session.commit()
 

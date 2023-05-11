@@ -2,10 +2,11 @@ from flask import Flask
 from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy
 
+
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "967e5507622ee781502896970aaccf8f1ddd553c06f73d9e5d518292d83a9c95"
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///site.db"
-app.config['UPLOADED_PHOTOS_DEST'] = "static/images"
+app.config["UPLOAD_FOLDER"] = "foorpp/static/images/"
 
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)

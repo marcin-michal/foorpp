@@ -103,7 +103,7 @@ def item(item_id):
 
     form = MenuItemForm(obj=menu_item)
     if form.validate_on_submit():
-        menu.item = menu_item.update(form, request.files)
+        menu.item = menu_item.update(form, request.files.get("image"))
         return redirect(url_for("menu"))
     elif "add_to_cart" in request.form:
         add_to_cart(item_id)
@@ -213,7 +213,7 @@ def add_menu_item():
 
     form = MenuItemForm()
     if form.validate_on_submit():
-        MenuItem().create(form)
+        MenuItem().create(form, request.files.get("image"))
         return redirect(url_for("menu"))
 
     return render_template("add_menu_item.html", form=form, back_page="menu",
