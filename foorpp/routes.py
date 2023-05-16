@@ -102,14 +102,14 @@ def item(item_id):
         abort(404)
 
     form = MenuItemForm(obj=menu_item)
-    if form.validate_on_submit():
+    if "remove_item" in request.form:
+        menu_item.remove()
+        return redirect(url_for("menu"))
+    elif form.validate_on_submit():
         menu.item = menu_item.update(form, request.files.get("image"))
         return redirect(url_for("menu"))
     elif "add_to_cart" in request.form:
         add_to_cart(item_id)
-    elif "remove_item" in request.form:
-        menu_item.remove()
-        return redirect(url_for("menu"))
 
     return render_template("item.html", item=menu_item, form=form,
                            id=session["id"], back_page="menu")
