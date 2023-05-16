@@ -27,9 +27,34 @@ class Category(db.Model):
 
 
     @staticmethod
-    def create(form):
-        db.session.add(Category(name=form.name.data))
+    def create(name):
+        category = Category(name=name)
+
+        db.session.add(category)
         db.session.commit()
+
+        return category
+
+
+    @staticmethod
+    def get_category_by_name(name):
+        category = Category.query.get(name)
+
+        if category is None:
+            category = Category.create(name)
+
+        return category
+
+
+    def add_item(self, item):
+        self.menu_items.append(item)
+
+
+    def remove_item(self, item):
+        self.menu_items.remove(item)
+
+        if len(self.menu_items) == 0:
+            db.session.delete(self)
 
 
 @total_ordering
@@ -55,6 +80,13 @@ class MenuItem(db.Model):
         self.name = form.name.data
         self.price = form.price.data
         self.description = form.description.data
+        if self.category_id != form.category.data:
+            if (self.category_id is not None):
+                Category.query.get(self.category_id).remove_item(self)
+
+            category = Category.get_category_by_name(form.category.data)
+            category.add_item(self)
+
         self.tags = form.tags.data
         self.allergens = form.allergens.data
 

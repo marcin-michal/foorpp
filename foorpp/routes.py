@@ -227,7 +227,7 @@ def category_manager():
 
     form = CategoryAddForm()
     if form.validate_on_submit():
-        Category.create(form)
+        Category.create(form.name.data)
     elif "remove_category" in request.form:
         Category.query.filter(Category.id == request.form["remove_category"]).delete()
         db.session.commit()

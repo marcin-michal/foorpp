@@ -51,7 +51,7 @@ class AdminLoginForm(FlaskForm):
 
 class MenuItemForm(FlaskForm):
     name = StringField("Name", validators=[DataRequired(),
-                                             Length(min=1, max=40)])
+                                           Length(min=1, max=40)])
     price = DecimalField("Price", places=2, validators=[DataRequired(),
                                                         NumberRange(min=0)])
     description = TextAreaField("Description")
@@ -59,6 +59,8 @@ class MenuItemForm(FlaskForm):
                       validators=[FileAllowed(['png', 'jpg', 'jpeg'])])
     tags = TextAreaField("Tags")
     allergens = TextAreaField("Allergens")
+    category = StringField("Category", validators=[DataRequired(),
+                                                   Length(min=1, max=20)])
     submit = SubmitField("Save item")
 
 
