@@ -38,7 +38,7 @@ class Category(db.Model):
 
     @staticmethod
     def get_category_by_name(name):
-        category = Category.query.get(name)
+        category = Category.query.filter(Category.name == name).first()
 
         if category is None:
             category = Category.create(name)
