@@ -1,5 +1,5 @@
 from foorpp import bcrypt, db
-from foorpp.models import AdminAccount, Category, MenuItem
+from foorpp.models import AdminAccount
 
 db.drop_all()
 db.create_all()
